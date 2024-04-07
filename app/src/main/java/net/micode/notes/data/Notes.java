@@ -18,11 +18,11 @@ package net.micode.notes.data;
 
 import android.net.Uri;
 
-/*
-本文件实现便签的数据库
-实现了对便签的相关属性包括：Anthority, Tag，以及数据，联系人的信息进行保存管理，实现了对若干属性的定义
-并定义了DataColumns，DataColumns接口，可用于其余类的实现
-在便签管理中实现TextNote,CallNote两个类，用于对便签内容的保存。
+/**
+ * 本文件实现便签的数据库
+ * 实现了对便签的相关属性包括：Anthority, Tag，以及数据，联系人的信息进行保存管理，实现了对若干属性的定义
+ * 并定义了DataColumns，DataColumns接口，可用于其余类的实现
+ * 在便签管理中实现TextNote,CallNote两个类，用于对便签内容的保存。
  */
 public class Notes {
     public static final String AUTHORITY = "micode_notes";
