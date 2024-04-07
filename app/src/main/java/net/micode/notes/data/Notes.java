@@ -55,7 +55,7 @@ public class Notes {
 
     /**
      * 定义一个接口类，这里是由若干属性（string）组织成的集合，在之后的NotesDatabaseHelper数据库创建、查询、修改中使用，
-     * 这里储存的就是关于便签属性的信息，比如创建时间、修改时间、提醒时间等信息。
+     * 这里储存的就是关于便签属性的信息，比如创建时间、修改时间、提醒时间等信息。1
      */
     public static class DataConstants {
         public static final String NOTE = TextNote.CONTENT_ITEM_TYPE;
