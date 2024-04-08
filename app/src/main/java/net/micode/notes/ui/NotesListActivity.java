@@ -142,6 +142,9 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
  
     @Override
     // 创建类
+    /**
+    * 覆盖基类方法，在应用程序启动时调用，用于初始化资源、设置布局，并检查是否需要向初次使用的用户展示介绍内容。
+    */
     protected void onCreate(final Bundle savedInstanceState) {  //需要是final类型   根据程序上下文环境，Java关键字final有“这是无法改变的”或者“终态的”含义，它可以修饰非抽象类、非抽象类成员方法和变量。你可能出于两种理解而需要阻止改变：设计或效率。
         // final类不能被继承，没有子类，final类中的方法默认是final的。
         //final方法不能被子类的方法覆盖，但可以被继承。
@@ -159,6 +162,9 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
  
     @Override
     // 返回一些子模块完成的数据交给主Activity处理
+    /*
+    *  当从另一个Activity返回结果时调用，更新列表数据以反映用户在其他Activity中所做的更改
+    * */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // 结果值 和 要求值 符合要求 
     	if (resultCode == RESULT_OK
@@ -169,7 +175,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             // 调用 Activity 的onActivityResult（）
         }
     }
- 
+    /**
+     *  在首次启动应用时（从Shared Preferences中检查标志位PREFERENCE_ADD_INTRODUCTION），
+     *  从raw资源目录读取名为"introduction"的文本文件，并将其内容作为一条工作笔记保存到数据库中。
+     *  之后更新 Shared Preferences 标志位，表示已添加过介绍
+     */
     private void setAppInfoFromRawRes() {
     	// Android平台给我们提供了一个SharedPreferences类，它是一个轻量级的存储类，特别适合用于保存软件配置参数。
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
@@ -220,14 +230,23 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             }
         }
     }
- 
     @Override
+    /**
+     * 覆盖父类方法，在活动开始时调用 startAsyncNotesListQuery() 来异步加载笔记列表数据
+     */
     protected void onStart() {
         super.onStart();
         startAsyncNotesListQuery();
     }
- 
-    // 初始化资源
+
+    /**
+     * 初始化活动所需的组件和变量，如Content Resolver、后台查询处理器（BackgroundQueryHandler）、根文件夹ID、ListView、Adapter等。
+     *
+     * 设置ListView的各种事件监听器，例如单击、长按事件处理，以及底部添加新笔记按钮的点击和触摸监听器。
+     *
+     * 创建了一个内部类 ModeCallback，实现了MultiChoiceModeListener和OnMenuItemClickListener接口，
+     * 用于处理多选模式下的各种菜单项点击事件，如删除、移动笔记等
+     */
     private void initResources() {
         mContentResolver = this.getContentResolver(); // 获取应用程序的数据，得到类似数据表的东西
         mBackgroundQueryHandler = new BackgroundQueryHandler(this.getContentResolver());
@@ -253,6 +272,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
     }
  
     // 继承自ListView.MultiChoiceModeListener 和 OnMenuItemClickListener
+
+    /**
+     * 该类主要用于显示和管理用户的笔记列表，支持多选操作（包括删除和移动笔记），
+     * 同时确保在应用启动时能正确加载和处理资源文件中的介绍信息
+     */
     private class ModeCallback implements ListView.MultiChoiceModeListener, OnMenuItemClickListener {
         private DropdownMenu mDropDownMenu;
         private ActionMode mActionMode;
@@ -368,7 +392,15 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             return true;
         }
     }
- 
+
+    /**
+     * @Description 这是一个实现 OnTouchListener 接口的内部类，
+     * 主要负责处理添加新笔记按钮的触摸事件。
+     * 其目的是在用户滑动屏幕时，如果触摸的是该按钮的透明部分，
+     * 事件会被传递给位于按钮下方的笔记列表视图。
+     * 这样设计是为了满足UI设计师的要求，使得用户可以通过滑动透明区域来滚动列表，
+     * 同时保持添加新笔记按钮始终可见。
+     */
     private class NewNoteOnTouchListener implements OnTouchListener {
  
         public boolean onTouch(View v, MotionEvent event) {
@@ -430,7 +462,11 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         }
  
     };
- 
+
+    /**
+     * @Description 发起异步查询请求以获取指定文件夹下的笔记列表数据。
+     * 使用 BackgroundQueryHandler 对象执行查询，并根据当前文件夹ID设置不同的查询条件。
+     */
     private void startAsyncNotesListQuery() {
         String selection = (mCurrentFolderId == Notes.ID_ROOT_FOLDER) ? ROOT_FOLDER_SELECTION
                 : NORMAL_SELECTION;
@@ -439,7 +475,12 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                     String.valueOf(mCurrentFolderId)
                 }, NoteColumns.TYPE + " DESC," + NoteColumns.MODIFIED_DATE + " DESC");
     }
- 
+
+    /**
+     * @Description 继承自 AsyncQueryHandler，用于在后台线程处理数据库查询。
+     * 覆盖了onQueryComplete() 方法，在查询完成时根据传入的令牌（token）更新UI，
+     * 比如替换笔记列表适配器的游标，或者处理查询文件夹列表的结果。
+     */
     private final class BackgroundQueryHandler extends AsyncQueryHandler {
         public BackgroundQueryHandler(ContentResolver contentResolver) {
             super(contentResolver);
@@ -463,7 +504,13 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             }
         }
     }
- 
+
+    /**
+     * @Description 当需要显示文件夹选择对话框时，
+     * 此方法构建并显示一个对话框，
+     * 其中包含了文件夹列表。用户选择某个文件夹后，
+     * 会批量移动所选笔记至该文件夹，并显示相应提示信息。
+     */
     private void showFolderListMenu(Cursor cursor) {
         AlertDialog.Builder builder = new AlertDialog.Builder(NotesListActivity.this);
         builder.setTitle(R.string.menu_title_select_folder);
@@ -484,14 +531,23 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
         });
         builder.show();
     }
- 
+
+    /**
+     * @Description 启动一个新的 NoteEditActivity 以创建或编辑笔记，传递当前文件夹ID作为额外意图参数。
+     */
     private void createNewNote() {
         Intent intent = new Intent(this, NoteEditActivity.class);
         intent.setAction(Intent.ACTION_INSERT_OR_EDIT);
         intent.putExtra(Notes.INTENT_EXTRA_FOLDER_ID, mCurrentFolderId);
         this.startActivityForResult(intent, REQUEST_CODE_NEW_NODE);
     }
- 
+
+    /**
+     * @Description 异步任务，用于批量删除所选笔记。
+     * 在非同步模式下直接删除笔记，在同步模式下将笔记移动到回收站文件夹。
+     * 在删除/移动操作完成后，如果有相关的桌面小部件存在，
+     * 更新这些小部件的状态。最后关闭多选模式。
+     */
     private void batchDelete() {
         new AsyncTask<Void, Void, HashSet<AppWidgetAttribute>>() {
             protected HashSet<AppWidgetAttribute> doInBackground(Void... unused) {
@@ -528,7 +584,13 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
             }
         }.execute();
     }
- 
+
+    /**
+     * @Description 删除指定ID的文件夹。首先判断是否是根文件夹，
+     * 如果是则不允许删除。接着收集该文件夹内所有笔记的ID，
+     * 并根据同步模式决定是直接删除还是移至回收站文件夹。
+     * 然后，更新与该文件夹关联的小部件。
+     */
     private void deleteFolder(long folderId) {
         if (folderId == Notes.ID_ROOT_FOLDER) {
             Log.e(TAG, "Wrong folder id, should not happen " + folderId);
