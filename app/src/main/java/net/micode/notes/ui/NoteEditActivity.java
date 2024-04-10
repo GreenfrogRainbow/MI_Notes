@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 //该类主要是针对标签的编辑
 //继承了系统内部许多和监听有关的类
@@ -453,7 +454,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
         if (id == R.id.btn_set_bg_color) {
             mNoteBgColorSelector.setVisibility(View.VISIBLE);
             findViewById(sBgSelectorSelectionMap.get(mWorkingNote.getBgColorId())).setVisibility(
-                    -                    View.VISIBLE);
+                    View.VISIBLE);
         } else if (sBgSelectorBtnsMap.containsKey(id)) {
             findViewById(sBgSelectorSelectionMap.get(mWorkingNote.getBgColorId())).setVisibility(
                     View.GONE);
@@ -515,7 +516,7 @@ public class NoteEditActivity extends Activity implements OnClickListener,
             getMenuInflater().inflate(R.menu.call_note_edit, menu);
             // MenuInflater是用来实例化Menu目录下的Menu布局文件的
         } else {
-            getMenuInflater().inflate(R.menu.note_edit, menu);
+            getMenuInflater().inflate(R.menu.call_note_edit, menu);
         }
         if (mWorkingNote.getCheckListMode() == TextNote.MODE_CHECK_LIST) {
             menu.findItem(R.id.menu_list_mode).setTitle(R.string.menu_normal_mode);
@@ -539,30 +540,40 @@ public class NoteEditActivity extends Activity implements OnClickListener,
                 createNewNote();
                 break;
             case R.id.menu_delete:
-                //删除标签
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                //创建关于删除的对话框
-                builder.setTitle(getString(R.string.alert_title_delete));
-                //设置标签的标题为alert_title_delete
-                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                //设置对话框图标
-                builder.setMessage(getString(R.string.alert_title_delete));
-                //设置对话框内容
-                builder.setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() //建立按键监听器
-                        {
-                            //点击所触发事件
-                            public void onClick(DialogInterface dialog, int which) {
-                                //删除单签便签
+                new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("确定要删除该便签吗?")
+                        .setContentText("注意不可恢复!")
+                        .setCancelText("取消!")
+                        .setConfirmText("确认删除!")
+                        .showCancelButton(true)
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                // reuse previous dialog instance, keep widget user state, reset them if you need
+                                sDialog.setTitleText("取消成功!")
+                                        .setContentText("本次操作已取消")
+                                        .setConfirmText("OK")
+                                        .showCancelButton(false)
+                                        .setCancelClickListener(null)
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.ERROR_TYPE);
+                            }
+                        })
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
                                 deleteCurrentNote();
-                                
+                                sDialog.setTitleText("删除成功!")
+                                        .setContentText("该便签已删除成功!")
+                                        .setConfirmText("OK")
+                                        .showCancelButton(false)
+                                        .setCancelClickListener(null)
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
                                 finish();
                             }
-                        }); //添加YES按钮
-                //添加NO按钮
-                builder.setNegativeButton(android.R.string.cancel, null);
-                //显示对话框
-                builder.show();
+                        })
+                        .show();
                 break;
             //字体大小的编辑
             case R.id.menu_font_size:

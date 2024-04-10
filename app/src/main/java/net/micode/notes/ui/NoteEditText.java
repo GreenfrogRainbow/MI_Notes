@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 //继承edittext，设置便签设置文本框
-public class NoteEditText extends EditText {
+public class NoteEditText extends androidx.appcompat.widget.AppCompatEditText {
     private static final String TAG = "NoteEditText";
     private int mIndex;
     private int mSelectionStartBeforeDelete;

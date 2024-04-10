@@ -78,6 +78,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 //主界面，一进入就是这个界面
 /**
  * @author k
@@ -368,20 +370,40 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
  
             switch (item.getItemId()) {
                 case R.id.delete:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(NotesListActivity.this);
-                    builder.setTitle(getString(R.string.alert_title_delete));
-                    builder.setIcon(android.R.drawable.ic_dialog_alert);
-                    builder.setMessage(getString(R.string.alert_message_delete_notes,
-                                             mNotesListAdapter.getSelectedCount()));
-                    builder.setPositiveButton(android.R.string.ok,
-                                             new DialogInterface.OnClickListener() {
-                                                 public void onClick(DialogInterface dialog,
-                                                         int which) {
-                                                     batchDelete();
-                                                 }
-                                             });
-                    builder.setNegativeButton(android.R.string.cancel, null);
-                    builder.show();
+                    new SweetAlertDialog(NotesListActivity.this, SweetAlertDialog.WARNING_TYPE)
+                            .setTitleText("确定要删除该便签吗?")
+                            .setContentText("注意不可恢复!")
+                            .setCancelText("取消!")
+                            .setConfirmText("确认删除!")
+                            .showCancelButton(true)
+                            .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    // reuse previous dialog instance, keep widget user state, reset them if you need
+                                    sDialog.setTitleText("取消成功!")
+                                            .setContentText("本次操作已取消")
+                                            .setConfirmText("OK")
+                                            .showCancelButton(false)
+                                            .setCancelClickListener(null)
+                                            .setConfirmClickListener(null)
+                                            .changeAlertType(SweetAlertDialog.ERROR_TYPE);
+                                }
+                            })
+                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sDialog) {
+                                    batchDelete();
+                                    sDialog.setTitleText("删除成功!")
+                                            .setContentText("该便签已删除成功!")
+                                            .setConfirmText("OK")
+                                            .showCancelButton(false)
+                                            .setCancelClickListener(null)
+                                            .setConfirmClickListener(null)
+                                            .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                                    finish();
+                                }
+                            })
+                            .show();
                     break;
                 case R.id.move:
                     startQueryDestinationFolders();
@@ -837,19 +859,55 @@ public class NotesListActivity extends Activity implements OnClickListener, OnIt
                 openFolder(mFocusNoteDataItem);//打开对应文件
                 break;
             case MENU_FOLDER_DELETE:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);//设置确认是否删除的对话框
-                builder.setTitle(getString(R.string.alert_title_delete));
-                builder.setIcon(android.R.drawable.ic_dialog_alert);
-                builder.setMessage(getString(R.string.alert_message_delete_folder));
-                builder.setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteFolder(mFocusNoteDataItem.getId());
+                new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("确定要删除该组便签吗?")
+                        .setContentText("注意不可恢复!")
+                        .setCancelText("取消!")
+                        .setConfirmText("确认删除!")
+                        .showCancelButton(true)
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                // reuse previous dialog instance, keep widget user state, reset them if you need
+                                sDialog.setTitleText("取消成功!")
+                                        .setContentText("本次操作已取消")
+                                        .setConfirmText("OK")
+                                        .showCancelButton(false)
+                                        .setCancelClickListener(null)
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.ERROR_TYPE);
                             }
-                        });
-                builder.setNegativeButton(android.R.string.cancel, null);
-                builder.show();//显示对话框
+                        })
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                deleteFolder(mFocusNoteDataItem.getId());
+                                sDialog.setTitleText("删除成功!")
+                                        .setContentText("该组便签已删除成功!")
+                                        .setConfirmText("OK")
+                                        .showCancelButton(false)
+                                        .setCancelClickListener(null)
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+
+                            }
+                        })
+                        .show();
                 break;
+
+//                AlertDialog.Builder builder = new AlertDialog.Builder(this);//设置确认是否删除的对话框
+//                builder.setTitle(getString(R.string.alert_title_delete));
+//                builder.setIcon(android.R.drawable.ic_dialog_alert);
+//                builder.setMessage(getString(R.string.alert_message_delete_folder));
+//                builder.setPositiveButton(android.R.string.ok,
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                deleteFolder(mFocusNoteDataItem.getId());
+//                            }
+//                        });
+//                builder.setNegativeButton(android.R.string.cancel, null);
+//                builder.show();//显示对话框
+
             case MENU_FOLDER_CHANGE_NAME:
                 showCreateOrModifyFolderDialog(false);
                 break;
