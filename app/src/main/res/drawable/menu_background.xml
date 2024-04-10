@@ -1,0 +1,5 @@
+<!-- menu_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFFFFF" /> <!-- 菜单背景颜色 -->
+    <corners android:radius="16dp" /> <!-- 圆角半径 -->
+</shape>
